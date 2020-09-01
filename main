@@ -1,0 +1,11 @@
+#include<iostream>
+#include<cstring>
+using namespace std;
+class player
+	{private:
+	        int number;//
+	        bool color;
+	        bool leader;
+	        int vote;
+	  
+	}

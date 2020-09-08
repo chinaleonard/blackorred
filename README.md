@@ -5,11 +5,12 @@
 #include <algorithm>
 using namespace std;
 struct serve
-    {bool borr;//红夜黑夜 
+    {bool warpeace//记录现在是选村长还是杀人
+	bool borr;//红夜黑夜 
     int leader;//村长位置
 	int series=0;//回合数 
-    bool* ps;//存储玩家当回合情况 
-	int* dietime ; 
+    int black;//存活黑牌人数 
+    int red;//存活红牌人数 
     };
 class player
 	{private:
@@ -18,7 +19,7 @@ class player
 	        bool color;//所拿身份牌颜色 
 	        bool leader;//是否是村长 
 	        int vote;//投票阶段有身上有多少票 
-	        int superticket;//村长专属，普通人不用管
+	        int ticket;//普通人就是一票，村长会波动 
 	        
 	 public:
 	void setstart(int x)
@@ -33,7 +34,16 @@ class player
 	bool getcolor()
 	    {return color;} 
     void die()
-	     {life=false;}//调用即死亡 
+	     {life=false;
+		 if(color==false)
+		   cout<<start<<"号玩家身份是红牌"<<endl;
+		   else
+		   cout<<start<<"号玩家身份是黑牌"<<endl; 
+		if(leader==1)
+		  {cout<<"主宰已经被击杀，下一条大龙即将重生"<<endl; 
+		  }
+		      
+		   }//调用即死亡 
 	bool alive()
 	    {return life;}
 	void voteto(int x)
@@ -42,8 +52,8 @@ class player
 	     {return vote;}
 	void voteclean()
 	     {vote=0;}//回合重新开始，vote清零 
-	void sticket(int x)
-	     {superticket=x;}//村长特票特殊处理 
+	void superticket(int x)
+	     {ticket=x;}//村长特票特殊处理 
 	     
 	};
 void randperm(int Num,int a[])//得到一个长度为n的随机数列（从1到n），不重复 
@@ -82,26 +92,36 @@ int littlevote(int x,int n, player* &a)
 		   }
 	    }//投票函数，并保证投票的有效性  
 	}
-int judge(int n,bool a[],bool b[])//a是生命，b是身份 
-     {int black=0;int red=0;
-	 for(int i=1;i<=n;i++)
-         while(a[i]==true)
-               {if(b[i]==true) black++;
-                  else red++;
-			   }
-	 if(black==0)
+int judge(int b.int r)//b->black;r->red
+     {
+	 if(b==0)
 	    {cout<<"红队赢得了最后的胜利"<<endl;
 		 return 1;}
-	 if(red==0)
+	 if(r==0)
 	   {cout<<"黑队赢得了最后的胜利"<<endl;
 		 return 2;}
 	 return 0; 
-	 }//每回合判断最终胜负情况,并返回值来供下一步最终结算 
-void mainvote(int n,player* &p,serve s,bool a)//投票选村长还是踢人出局 
+	 }//每回合判断最终胜负情况,并返回值来供下一步最终结算
+	 
+void declare(int x,bool &a,player* &p,int n)//declare完成一轮投票之后发生的一系列事情 
+//x号玩家，a判断是选村长还是杀人，n是人数 
+{if(a==0)
+        {cout<<"投票结果已经产生，村长是"<<x<<"号玩家,新王登基，万国朝宗"
+        if(n%2==0)
+          p[x].superticket(1.5);
+        else
+          p[x].superticket(0.5);	 
+        }
+   else
+   {cout<<"投票结果已产生，"<<x<<"号玩家英勇牺牲，骨灰撒大海"
+    p[x].die();
+   }
+ } 
+void mainvote(int n,player* &p,serve s,bool &a)//a表示投票选村长还是踢人出局,a==true选村长，a==false杀人 
      {
      int *temp =new int[n];
      for( int i=0;i<n;i++)
-     temp[i]=littlevote(i,n,p);//
+     temp[i]=littlevote(i,n,p);//i号玩家投票，共n个人，并存入被投票玩家对象的记录票数的成员 
      for(int i=0;i<n;i++)   
         p[temp[i]].voteto(1);//存入每个人头上的票数
      int max=p[0].getvote();
@@ -117,17 +137,22 @@ void mainvote(int n,player* &p,serve s,bool a)//投票选村长还是踢人出�
            k++;//遍历得到temp2作为最高票小分队，进入此分队成员被送往下一轮投票 
 	      }
      if(temp1==1)//一轮投票已结束，判断是否要二次投票 
-       {cout<<"投票结果已产生,村长是";
-       cout<<temp2[0]<<"号玩家，新王登基，普天同庆";
-       s.leader=temp2[0];
+       {
+		 if(a==true) 
+	        declare(temp2[0],true,p,n);
+	     else 
+	        declare(temp2[0],false,p,n)//投票可能导致的一系列事件处理 
+       }
      else
-       againvote(int t1,player* &p,int *t2,serve s);
-       //t1当前最高票有几人，t2由最高票玩家序号组成的数组 
-	    
+       while(1)
+       {againvote() 
+	   }
+	  
      
 	  
 	
 	 }  
+} 
 int main ()
 {int n;
 cin>>n;
@@ -144,7 +169,7 @@ p[i].setcolor(a[i]);
 delete a;
          //for(int i=1;i<n+1;i++)
         //  cout<<p[i].getstart()<<"  "<<p[i].getcolor()<<endl;
-		 //验证分配编号和颜色，已成功 
+		 //验证分配编号和颜色，已成功 ，前期准备工作做完。 
 
 cout<<"游戏正式开始"<<endl<<"第一天，真是个做水果蛋糕的好日子"<<endl;
 for(int i=0;i<n;i++)
@@ -158,4 +183,4 @@ cout<<"开始投票选出第一任村长"<<endl;
 	
 		
 		
-		} 
+		
